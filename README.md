@@ -14,7 +14,7 @@ An interactive tool that visualizes data regarding a GGUF (GPT-Generated Unified
 
 ## Directory Structure
 
-``
+````Interactive-GGUF-Visualization-Tool/
 Interactive-GGUF-Visualization-Tool/
 ├── audio/
 │   ├── Benevolence_Messiah_DJ_Kwe.wav
@@ -23,10 +23,10 @@ Interactive-GGUF-Visualization-Tool/
 │   └── [GGUF models and repositories]
 ├── modules/
 │   ├── data_utils.py
-│   ├── download_tool.py       # Newly added file
+│   ├── download_tool.py
 │   ├── gguf_model.py
 │   ├── self_awareness_experiment.py
-│   ├── visualization_tool.py  # Newly added file
+│   ├── visualization_tool.py
 │   └── visualization_utils.py
 ├── outputs/
 │   └── [Chat session JSON files]
@@ -35,13 +35,13 @@ Interactive-GGUF-Visualization-Tool/
 ├── docs/
 │   └── [Documentation files]
 ├── interactive_gguf_visualization_tool.ipynb
-├── gradio_app.py              # Updated to use download_tool.py and visualization_tool.py
+├── gradio_app.py
 ├── main.py
 ├── Dockerfile
 ├── requirements.txt
 ├── Run_Interactive-GGUF-Visualization-Tool.bat
 └── README.md
-``
+````
 
 
 - **`audio/`**: Contains audio files used by the batch script to play sounds.
@@ -80,7 +80,7 @@ Interactive-GGUF-Visualization-Tool/
 
 1. **Run this series of commands ensuring they all complete succefully**
 
-   ```bash
+   ````bash
    git clone https://github.com/BenevolenceMessiah/Interactive-GGUF-Visualization-Tool.git
    cd Interactive-GGUF-Visualization-Tool
    python -m venv .venv
@@ -96,23 +96,26 @@ Interactive-GGUF-Visualization-Tool/
    pip install mkdocs
    mkdocs build
    cd ..
-   python main.py
-   docker run --gpus all -p 7934:7934 gguf-visualization-tool
-````
+   python main.py  # Gradio
+   docker run --gpus all -p 7934:7934 gguf-visualization-tool  # Docker
+   jupyter notebook interactive_gguf_visualization_tool.ipynb  # Jupyter Notebook
+   ````
+
 ## Additional Notes ##
 CUDA Support: Ensure that your system has NVIDIA drivers supporting CUDA 12.1 installed. This is crucial for GPU acceleration.
 Docker and Gradio Ports: Gradio runs on port 7933 by default, while the Docker container runs on port 7934. They can operate simultaneously without port conflicts.
 Batch Script: The Run_Interactive-GGUF-Visualization-Tool.bat script facilitates easy installation and execution on Windows systems. It also manages audio playback and environment setup.
 
+### To Do: ###
+- Create Google Colab Notebook to leverage T4 GPU
+- Create HuggingFace Space to Leverage whatever free architecture that we can run over there.
+
+---
+
 License
 This project is licensed under the MIT License.
 
 Contact
-For any inquiries or support, please contact BenevolenceMessiah.
+For any inquiries or support, please contact [Benevolence Messiah](https://huggingface.co/BenevolenceMessiah).
 
 ---
-
-
-
-
-
