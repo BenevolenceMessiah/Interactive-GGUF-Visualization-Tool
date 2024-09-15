@@ -97,8 +97,7 @@ def run_self_awareness_experiment(prompt):
 
 def get_visualization_json():
     if gguf_model:
-        # Example: Get attention weights or other data for visualization
-        # This is a placeholder; implement actual data retrieval as needed
+        # Get visualization data
         visualization_data = get_visualization_data(gguf_model)
         return visualization_data
     else:
@@ -398,7 +397,7 @@ def create_gradio_interface():
                     with gr.TabItem("Brain Visualization"):
                         gr.Markdown("### Brain Visualization")
                         brain_vis = gr.HTML("<div id='brain-visualization'></div>")
-                        # Fetch brain visualization data and embed D3.js and Three.js scripts
+                        # Fetch brain visualization data and embed Three.js scripts
                         brain_data = gr.State()
 
                         def update_brain_visualization():
@@ -408,86 +407,90 @@ def create_gradio_interface():
                         brain_data_event = gr.Button("Load Brain Visualization Data")
                         brain_data_event.click(update_brain_visualization, outputs=brain_data)
 
-                        brain_vis_content = gr.HTML("""
-                        <script src="https://d3js.org/d3.v7.min.js"></script>
+                        brain_vis_content_template = """
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
                         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/controls/OrbitControls.js"></script>
                         <div id="brain-visualization-container" style="width: 800px; height: 600px;"></div>
                         <script>
-                            // Placeholder: This is a simple example using D3.js and Three.js
-                            const data = {data_json};
+                            (function() {{
+                                const data = {data_json};
 
-                            // Initialize Three.js scene
-                            const scene = new THREE.Scene();
-                            const camera = new THREE.PerspectiveCamera(75, 800/600, 0.1, 1000);
-                            const renderer = new THREE.WebGLRenderer({alpha: true});
-                            renderer.setSize(800, 600);
-                            document.getElementById('brain-visualization-container').appendChild(renderer.domElement);
+                                // Initialize Three.js scene
+                                const scene = new THREE.Scene();
+                                const camera = new THREE.PerspectiveCamera(75, 800/600, 0.1, 1000);
+                                const renderer = new THREE.WebGLRenderer({{alpha: true}});
+                                renderer.setSize(800, 600);
+                                document.getElementById('brain-visualization-container').appendChild(renderer.domElement);
 
-                            // Add orbit controls for interactivity
-                            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+                                // Add orbit controls for interactivity
+                                const controls = new THREE.OrbitControls(camera, renderer.domElement);
 
-                            // Add ambient light
-                            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-                            scene.add(ambientLight);
+                                // Add ambient and point lights
+                                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                                scene.add(ambientLight);
 
-                            // Add point light
-                            const pointLight = new THREE.PointLight(0xffffff, 1);
-                            pointLight.position.set(10, 10, 10);
-                            scene.add(pointLight);
+                                const pointLight = new THREE.PointLight(0xffffff, 1);
+                                pointLight.position.set(50, 50, 50);
+                                scene.add(pointLight);
 
-                            // Add semi-translucent brain mesh (placeholder)
-                            const geometry = new THREE.SphereGeometry(5, 32, 32);
-                            const material = new THREE.MeshPhongMaterial({
-                                color: 0x156289,
-                                emissive: 0x072534,
-                                side: THREE.DoubleSide,
-                                transparent: true,
-                                opacity: 0.6
-                            });
-                            const brainMesh = new THREE.Mesh(geometry, material);
-                            scene.add(brainMesh);
+                                // Add semi-translucent brain mesh (placeholder)
+                                const brainGeometry = new THREE.SphereGeometry(10, 64, 64);
+                                const brainMaterial = new THREE.MeshPhongMaterial({{
+                                    color: 0x156289,
+                                    emissive: 0x072534,
+                                    side: THREE.DoubleSide,
+                                    transparent: true,
+                                    opacity: 0.3
+                                }});
+                                const brainMesh = new THREE.Mesh(brainGeometry, brainMaterial);
+                                scene.add(brainMesh);
 
-                            // Add data points as heatmap (example)
-                            data.nodes.forEach(node => {
-                                const nodeGeometry = new THREE.SphereGeometry(0.1 * node.size, 8, 8);
-                                const nodeMaterial = new THREE.MeshBasicMaterial({color: node.color});
-                                const nodeMesh = new THREE.Mesh(nodeGeometry, nodeMaterial);
-                                nodeMesh.position.set(node.x, node.y, node.z);
-                                scene.add(nodeMesh);
-                            });
+                                // Add nodes (neurons or layers)
+                                data.nodes.forEach(node => {{
+                                    const nodeGeometry = new THREE.SphereGeometry(0.5 * node.size, 16, 16);
+                                    const nodeMaterial = new THREE.MeshBasicMaterial({{color: node.color}});
+                                    const nodeMesh = new THREE.Mesh(nodeGeometry, nodeMaterial);
+                                    nodeMesh.position.set(node.x, node.y, node.z);
+                                    scene.add(nodeMesh);
+                                }});
 
-                            // Add neuron pathways (example)
-                            data.links.forEach(link => {
-                                const sourceNode = data.nodes.find(node => node.id === link.source);
-                                const targetNode = data.nodes.find(node => node.id === link.target);
-                                if (sourceNode && targetNode) {
-                                    const points = [];
-                                    points.push(new THREE.Vector3(sourceNode.x, sourceNode.y, sourceNode.z));
-                                    points.push(new THREE.Vector3(targetNode.x, targetNode.y, targetNode.z));
-                                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                                    const material = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: link.value});
-                                    const line = new THREE.Line(geometry, material);
-                                    scene.add(line);
-                                }
-                            });
+                                // Add links (connections between nodes)
+                                data.links.forEach(link => {{
+                                    const sourceNode = data.nodes.find(node => node.id === link.source);
+                                    const targetNode = data.nodes.find(node => node.id === link.target);
+                                    if (sourceNode && targetNode) {{
+                                        const points = [];
+                                        points.push(new THREE.Vector3(sourceNode.x, sourceNode.y, sourceNode.z));
+                                        points.push(new THREE.Vector3(targetNode.x, targetNode.y, targetNode.z));
+                                        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                                        const material = new THREE.LineBasicMaterial({{color: 0xffffff, linewidth: link.value}});
+                                        const line = new THREE.Line(geometry, material);
+                                        scene.add(line);
+                                    }}
+                                }});
 
-                            camera.position.z = 50;
+                                camera.position.z = 30;
 
-                            // Animation loop
-                            function animate() {
-                                requestAnimationFrame(animate);
-                                controls.update();
-                                renderer.render(scene, camera);
-                            }
+                                // Animation loop
+                                function animate() {{
+                                    requestAnimationFrame(animate);
+                                    controls.update();
+                                    renderer.render(scene, camera);
+                                }}
 
-                            animate();
+                                animate();
+                            }})();
                         </script>
-                        """)
+                        """
+
+                        # Function to inject data into the brain visualization HTML
+                        def update_brain_vis_content(data):
+                            data_json = json.dumps(data)
+                            return brain_vis_content_template.replace("{data_json}", data_json)
 
                         # Bind the data to the HTML component
                         brain_data_event.click(
-                            lambda data: brain_vis_content.replace("{data_json}", json.dumps(data)),
+                            update_brain_vis_content,
                             inputs=brain_data,
                             outputs=brain_vis
                         )

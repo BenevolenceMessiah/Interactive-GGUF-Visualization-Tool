@@ -114,18 +114,18 @@ echo Activating virtual environment
 call .venv\Scripts\activate
 echo --------------------------------------------------------------
 python.exe -m pip install --upgrade pip
-pip install --upgrade --force-reinstall torch==2.2.0 --index-url https://download.pytorch.org/whl/cu121
+:: pip install --upgrade --force-reinstall torch==2.2.0 --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
-git clone https://github.com/ggerganov/llama-cpp-python.git
-cd llama-cpp-python
-LLAMA_CUBLAS=1 pip install .
-pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu121
+:: git clone https://github.com/ggerganov/llama-cpp-python.git
+:: cd llama-cpp-python
+:: LLAMA_CUBLAS=1 pip install .
+:: pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu121
 cd ..
 cd docs
 pip install mkdocs
 mkdocs build
 cd ..
-pip install docker
+:: pip install docker
 docker build -t gguf-visualization-tool .
 echo Installation Complete!
 echo --------------------------------------------------------------

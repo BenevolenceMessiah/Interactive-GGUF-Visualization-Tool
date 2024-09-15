@@ -1,11 +1,23 @@
-gradio>=3.0.0
-huggingface_hub>=0.13.3
-numpy>=1.21.0
+# requirements.txt
+
+# Extra indexes for specific packages
+--extra-index-url https://download.pytorch.org/whl/cu121
+--extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu121
+
+# Core Dependencies
+gradio>=3.35.0
+torch==2.2.0+cu121            # GPU-accelerated PyTorch
+huggingface_hub>=0.14.1
+numpy>=1.23.5
 pandas>=1.3.0
 plotly>=5.3.1
 matplotlib>=3.4.2
 loguru>=0.5.3
 structlog>=21.5.0
-llama-cpp-python>=0.1.59
-jupyter
-docker
+llama-cpp-python>=0.1.75      # Prebuilt wheels from custom index
+requests==2.28.2
+docker                        # Python Docker client
+
+# Optional Dependencies
+mkdocs>=1.4.0                  # Documentation tool (remove if not needed)
+jupyter>=1.0.0                 # Interactive notebooks (remove if not needed)
