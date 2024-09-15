@@ -119,6 +119,7 @@ pip install -r requirements.txt
 git clone https://github.com/ggerganov/llama-cpp-python.git
 cd llama-cpp-python
 LLAMA_CUBLAS=1 pip install .
+pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu121
 cd ..
 cd docs
 pip install mkdocs

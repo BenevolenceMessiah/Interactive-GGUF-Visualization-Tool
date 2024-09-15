@@ -10,7 +10,9 @@ import modules.visualization_utils as visualization_utils
 from modules.self_awareness_experiment import run_self_referential_question
 from modules.download_tool import search_models, download_model  # Import from download_tool.py
 from modules.visualization_tool import get_visualization_data  # Import from visualization_tool.py
+from modules.brain_visualization import prepare_brain_visualization_data  # Import from brain_visualization.py
 import torch
+import json
 
 # Global variable for the model
 gguf_model = None
@@ -88,7 +90,6 @@ def load_chat(chat_file):
     return history
 
 def run_self_awareness_experiment(prompt):
-    from modules.self_awareness_experiment import run_self_referential_question
     if gguf_model:
         return run_self_referential_question(gguf_model, prompt)
     else:
@@ -100,6 +101,14 @@ def get_visualization_json():
         # This is a placeholder; implement actual data retrieval as needed
         visualization_data = get_visualization_data(gguf_model)
         return visualization_data
+    else:
+        return {}
+
+def get_brain_visualization_json():
+    if gguf_model:
+        # Prepare brain visualization data
+        brain_data = prepare_brain_visualization_data(gguf_model)
+        return brain_data
     else:
         return {}
 
@@ -213,7 +222,7 @@ def create_gradio_interface():
                                .attr("fill", d => d.z === 0 ? "blue" : "red");
                         </script>
                         """)
-                        
+
                         # Bind the data to the HTML component
                         layer_data_event.click(
                             lambda data: layer_vis_content.replace("{data_json}", json.dumps(data)),
@@ -366,10 +375,7 @@ def create_gradio_interface():
                             // Assuming embeddings are 3D coordinates
                             const embeddings = data.embeddings || [];
 
-                            const projection = d3.geoOrthographic()
-                                                 .translate([width / 2, height / 2])
-                                                 .scale(200);
-
+                            // Simple scatter plot for 3D embeddings projected to 2D
                             svg.selectAll("circle")
                                .data(embeddings)
                                .enter()
@@ -377,7 +383,8 @@ def create_gradio_interface():
                                .attr("cx", d => d[0] * 10 + width / 2)
                                .attr("cy", d => -d[1] * 10 + height / 2)
                                .attr("r", 5)
-                               .attr("fill", "green");
+                               .attr("fill", "green")
+                               .attr("opacity", 0.6);
                         </script>
                         """)
 
@@ -386,6 +393,103 @@ def create_gradio_interface():
                             lambda data: embedding_vis_content.replace("{data_json}", json.dumps(data)),
                             inputs=embedding_data,
                             outputs=embedding_vis
+                        )
+
+                    with gr.TabItem("Brain Visualization"):
+                        gr.Markdown("### Brain Visualization")
+                        brain_vis = gr.HTML("<div id='brain-visualization'></div>")
+                        # Fetch brain visualization data and embed D3.js and Three.js scripts
+                        brain_data = gr.State()
+
+                        def update_brain_visualization():
+                            data = get_brain_visualization_json()
+                            return data
+
+                        brain_data_event = gr.Button("Load Brain Visualization Data")
+                        brain_data_event.click(update_brain_visualization, outputs=brain_data)
+
+                        brain_vis_content = gr.HTML("""
+                        <script src="https://d3js.org/d3.v7.min.js"></script>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+                        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/controls/OrbitControls.js"></script>
+                        <div id="brain-visualization-container" style="width: 800px; height: 600px;"></div>
+                        <script>
+                            // Placeholder: This is a simple example using D3.js and Three.js
+                            const data = {data_json};
+
+                            // Initialize Three.js scene
+                            const scene = new THREE.Scene();
+                            const camera = new THREE.PerspectiveCamera(75, 800/600, 0.1, 1000);
+                            const renderer = new THREE.WebGLRenderer({alpha: true});
+                            renderer.setSize(800, 600);
+                            document.getElementById('brain-visualization-container').appendChild(renderer.domElement);
+
+                            // Add orbit controls for interactivity
+                            const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+                            // Add ambient light
+                            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                            scene.add(ambientLight);
+
+                            // Add point light
+                            const pointLight = new THREE.PointLight(0xffffff, 1);
+                            pointLight.position.set(10, 10, 10);
+                            scene.add(pointLight);
+
+                            // Add semi-translucent brain mesh (placeholder)
+                            const geometry = new THREE.SphereGeometry(5, 32, 32);
+                            const material = new THREE.MeshPhongMaterial({
+                                color: 0x156289,
+                                emissive: 0x072534,
+                                side: THREE.DoubleSide,
+                                transparent: true,
+                                opacity: 0.6
+                            });
+                            const brainMesh = new THREE.Mesh(geometry, material);
+                            scene.add(brainMesh);
+
+                            // Add data points as heatmap (example)
+                            data.nodes.forEach(node => {
+                                const nodeGeometry = new THREE.SphereGeometry(0.1 * node.size, 8, 8);
+                                const nodeMaterial = new THREE.MeshBasicMaterial({color: node.color});
+                                const nodeMesh = new THREE.Mesh(nodeGeometry, nodeMaterial);
+                                nodeMesh.position.set(node.x, node.y, node.z);
+                                scene.add(nodeMesh);
+                            });
+
+                            // Add neuron pathways (example)
+                            data.links.forEach(link => {
+                                const sourceNode = data.nodes.find(node => node.id === link.source);
+                                const targetNode = data.nodes.find(node => node.id === link.target);
+                                if (sourceNode && targetNode) {
+                                    const points = [];
+                                    points.push(new THREE.Vector3(sourceNode.x, sourceNode.y, sourceNode.z));
+                                    points.push(new THREE.Vector3(targetNode.x, targetNode.y, targetNode.z));
+                                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                                    const material = new THREE.LineBasicMaterial({color: 0xffffff, linewidth: link.value});
+                                    const line = new THREE.Line(geometry, material);
+                                    scene.add(line);
+                                }
+                            });
+
+                            camera.position.z = 50;
+
+                            // Animation loop
+                            function animate() {
+                                requestAnimationFrame(animate);
+                                controls.update();
+                                renderer.render(scene, camera);
+                            }
+
+                            animate();
+                        </script>
+                        """)
+
+                        # Bind the data to the HTML component
+                        brain_data_event.click(
+                            lambda data: brain_vis_content.replace("{data_json}", json.dumps(data)),
+                            inputs=brain_data,
+                            outputs=brain_vis
                         )
 
             with gr.TabItem("Self-Awareness Experiment"):

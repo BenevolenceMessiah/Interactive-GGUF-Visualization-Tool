@@ -27,7 +27,8 @@ Interactive-GGUF-Visualization-Tool/
 │   ├── gguf_model.py
 │   ├── self_awareness_experiment.py
 │   ├── visualization_tool.py
-│   └── visualization_utils.py
+│   ├── visualization_utils.py
+│   └── brain_visualization.py
 ├── outputs/
 │   └── [Chat session JSON files]
 ├── tests/
@@ -40,7 +41,10 @@ Interactive-GGUF-Visualization-Tool/
 ├── Dockerfile
 ├── requirements.txt
 ├── Run_Interactive-GGUF-Visualization-Tool.bat
-└── README.md
+├── README.md
+└── .github/
+    └── workflows/
+        └── python-app.yml
 ````
 
 
