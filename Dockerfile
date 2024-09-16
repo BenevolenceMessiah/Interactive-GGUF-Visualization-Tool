@@ -1,18 +1,16 @@
 # Dockerfile
 
-# Use NVIDIA's CUDA base image
-FROM nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu20.04
+# Use the official Python 3.10 slim image as the base
+FROM python:3.10-slim
 
-# Set working directory
-WORKDIR /app
+# Set environment variables to prevent Python from writing .pyc files and buffer outputs
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 # Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     git \
-    python3.10 \
-    python3-pip \
-    python3.10-dev \
     build-essential \
     cmake \
     wget \
@@ -20,34 +18,28 @@ RUN apt-get update && \
     ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-# Install pip and upgrade
-RUN python3.10 -m pip install --upgrade pip
+# Upgrade pip
+RUN pip install --upgrade pip
 
-# Install PyTorch with CUDA 12.1 support
-RUN pip install --upgrade --force-reinstall torch==2.2.0 --index-url https://download.pytorch.org/whl/cu121
-
-# Copy requirements file
+# Install Python dependencies
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install Python dependencies excluding torch
-RUN pip install -r requirements.txt
+# Clone and install llama-cpp-python
+RUN git clone https://github.com/ggerganov/llama-cpp-python.git && \
+    cd llama-cpp-python && \
+    LLAMA_CUBLAS=1 pip install . && \
+    cd ..
 
-# Build and install llama-cpp-python with CUDA support
-RUN git clone https://github.com/ggerganov/llama-cpp-python.git
-WORKDIR /app/llama-cpp-python
-RUN LLAMA_CUBLAS=1 pip install .
-
-# Return to app directory
-WORKDIR /app
-
-# Copy application code
+# Copy the rest of the application code
 COPY . /app
 
-# Expose port
+# Set the working directory
+WORKDIR /app
+
+# Expose the ports Gradio runs on
+# EXPOSE 7933 7934
 EXPOSE 7934
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
-
-# Run the application
-CMD ["python3.10", "main.py"]
+# Define the default command to run your application
+CMD ["python", "main.py"]

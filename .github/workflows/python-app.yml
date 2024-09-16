@@ -57,11 +57,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build Docker image
+      - name: Build and Push Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: true  # Change to 'true' to push the image
+          push: true  # Push the image to DockerHub
           tags: benevolencemessiah/interactive-gguf-visualization-tool-containerized:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
@@ -165,11 +165,12 @@ jobs:
       - name: Run Docker Container
         run: |
           # Run the Docker container in detached mode with GPU support
-          docker run --gpus all -d -p 7934:7934 --name gguf_test_container benevolencemessiah/interactive-gguf-visualization-tool-containerized:latest
+          # IMPORTANT: GitHub-hosted runners do not support GPUs. Use self-hosted runners with GPU capabilities.
+          docker run --gpus all -d -p 7934:7934 --name gguf_test_container benevolencemessiah/interactive-gguf-visualization-tool-containerized:latest || exit 1
 
       - name: Wait for Docker to initialize
         run: |
-          sleep 10
+          sleep 20  # Increased sleep time to allow the server to start
 
       - name: Check Docker Container
         run: |
@@ -177,7 +178,7 @@ jobs:
 
       - name: Perform HTTP request to Gradio server
         run: |
-          curl -sSf http://localhost:7934 || exit 1
+          curl -sSf http://localhost:7934 || (docker logs gguf_test_container && exit 1)
 
       - name: Clean up Docker Container
         if: always()

@@ -127,6 +127,7 @@ mkdocs build
 cd ..
 :: pip install docker
 docker build -t gguf-visualization-tool .
+docker build -t interactive-gguf-visualization-tool:latest .
 echo Installation Complete!
 echo --------------------------------------------------------------
 cd audio
