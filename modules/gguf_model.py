@@ -165,4 +165,3 @@ class GGUFModel:
         except Exception as e:
             print(f"Error computing link weight for layer {layer_index}: {e}")
             return 0.0
-

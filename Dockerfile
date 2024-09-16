@@ -25,11 +25,8 @@ RUN pip install --upgrade pip
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Clone and install llama-cpp-python
-RUN git clone https://github.com/ggerganov/llama-cpp-python.git && \
-    cd llama-cpp-python && \
-    LLAMA_CUBLAS=1 pip install . && \
-    cd ..
+# Install llama-cpp-python with CUDA support
+RUN pip install llama-cpp-python>=0.1.75 --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu121
 
 # Copy the rest of the application code
 COPY . /app
