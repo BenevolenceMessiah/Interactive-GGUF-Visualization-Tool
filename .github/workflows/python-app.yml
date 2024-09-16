@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install --upgrade --force-reinstall torch==2.2.0 --index-url https://download.pytorch.org/whl/cu121
+          pip install --upgrade --force-reinstall torch==2.2.0+cu121 --index-url https://download.pytorch.org/whl/cu121
           pip install -r requirements.txt
 
       - name: Install llama-cpp-python from prebuilt wheel
@@ -61,8 +61,8 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          push: false
-          tags: gguf-visualization-tool:latest
+          push: true  # Change to 'true' to push the image
+          tags: benevolencemessiah/interactive-gguf-visualization-tool-containerized:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
@@ -99,7 +99,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install --upgrade --force-reinstall torch==2.2.0 --index-url https://download.pytorch.org/whl/cu121
+          pip install --upgrade --force-reinstall torch==2.2.0+cu121 --index-url https://download.pytorch.org/whl/cu121
           pip install -r requirements.txt
 
       - name: Install llama-cpp-python from prebuilt wheel
@@ -133,7 +133,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install --upgrade --force-reinstall torch==2.2.0 --index-url https://download.pytorch.org/whl/cu121
+          pip install --upgrade --force-reinstall torch==2.2.0+cu121 --index-url https://download.pytorch.org/whl/cu121
           pip install -r requirements.txt
 
       - name: Install llama-cpp-python from prebuilt wheel
@@ -164,8 +164,8 @@ jobs:
 
       - name: Run Docker Container
         run: |
-          # Run the Docker container in detached mode without GPU support
-          docker run -d -p 7934:7934 --name gguf_test_container gguf-visualization-tool:latest
+          # Run the Docker container in detached mode with GPU support
+          docker run --gpus all -d -p 7934:7934 --name gguf_test_container benevolencemessiah/interactive-gguf-visualization-tool-containerized:latest
 
       - name: Wait for Docker to initialize
         run: |
